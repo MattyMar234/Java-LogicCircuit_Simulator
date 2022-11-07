@@ -10,13 +10,17 @@ import javafx.stage.Stage;
 
 
 
-public class App extends Application{
+public class App extends Application
+{
+    public static final String Directory    = System.getProperty("user.dir");
+    public static final String FileFXML = Directory + "\\src\\fxml\\ApplicationPageController.fxml"
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello, World!");
+        System.out.println("Running...");
+        launch(args);
     }
 
     @Override
-    public void start(Stage arg0) throws Exception {
+    public void start(Stage state) throws Exception {
         // TODO Auto-generated method stub
         
     }
