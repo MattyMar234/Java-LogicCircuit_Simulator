@@ -1,0 +1,7 @@
+#windowBack {
+    -fx-background-color: #211936
+}
+
+#canvas, #sideBar {
+    -fx-background-color: #271f1f
+}
