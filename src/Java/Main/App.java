@@ -23,6 +23,7 @@ public class App extends Application
     public static final String DirectoryFiles_FXML = Directory + "\\src\\fxml";
 
     public static HashMap<String, String> FxmlFile_Paths = new HashMap<String, String>();
+    protected ApplicationPageController ControllerReference;
 
 
     public static void main(String[] args) throws Exception {
@@ -46,9 +47,17 @@ public class App extends Application
             }
 
             //************ Impostazioni pagina ************//
+
+            FXMLLoader loader = getStageFXMLLoader("ApplicationPage");
+
+            loader.setControllerFactory( c -> {
+                return new ApplicationPageController(this);
+            });
+
+            setLoader(stage, loader);
             
             stage.setTitle("Circuit Simulator");
-            SetStage(stage, "ApplicationPage");
+            //SetStage(stage, "ApplicationPage");
             stage.show();
 
             //lambda function 
@@ -75,6 +84,11 @@ public class App extends Application
         System.out.println("Loading: " + FxmlFile_Paths.get(name));
         URL fxmlLocation = getClass().getClassLoader().getResource(FxmlFile_Paths.get(name));
         FXMLLoader loader = new FXMLLoader(fxmlLocation);
+        Scene scene = new Scene(loader.load());
+        stage.setScene(scene);
+    }
+
+    public void setLoader(Stage stage, FXMLLoader loader) throws IOException {
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);
     }
