@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="windowBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/ApplicationTheme.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Java.Main.ApplicationPageController">
+<AnchorPane fx:id="windowBack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Java.Main.ApplicationPageController">
    <children>
+      <StackPane fx:id="canvasPane" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
+         <children>
+            <Canvas fx:id="canvas" height="381.0" onMouseDragged="#OnDragged" onMousePressed="#OnMousePressed" onMouseReleased="#OnMouseReleased" onScroll="#GridZoom" width="487.0" />
+         </children>
+      </StackPane>
       <AnchorPane fx:id="sideBar" layoutX="-24.0" layoutY="90.0" maxWidth="-Infinity" prefHeight="400.0" prefWidth="82.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <VBox layoutY="76.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
+                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="90.0">
+                     <children>
+                        <Button fx:id="EEPROM_bt" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="30.0" minWidth="30.0" mnemonicParsing="false" onAction="#AddEEProm" prefHeight="30.0" prefWidth="69.0" text="EEPROM" />
+                     </children></HBox>
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
@@ -20,6 +31,9 @@
             </VBox>
          </children>
       </AnchorPane>
-      <Canvas fx:id="canvas" height="381.0" layoutX="200.0" layoutY="81.0" width="487.0" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="13.0" AnchorPane.topAnchor="10.0" />
    </children>
+   <stylesheets>
+      <URL value="@../css/ApplicationTheme.css" />
+      <URL value="@../css/ApplicationTheme.css" />
+   </stylesheets>
 </AnchorPane>

@@ -24,6 +24,7 @@ public class App extends Application
 
     public static HashMap<String, String> FxmlFile_Paths = new HashMap<String, String>();
     protected ApplicationPageController ControllerReference;
+    protected Scene AttualScene;
 
 
     public static void main(String[] args) throws Exception {
@@ -45,6 +46,7 @@ public class App extends Application
         
                 }
             }
+
 
             //************ Impostazioni pagina ************//
 
@@ -83,17 +85,18 @@ public class App extends Application
     {
         System.out.println("Loading: " + FxmlFile_Paths.get(name));
         URL fxmlLocation = getClass().getClassLoader().getResource(FxmlFile_Paths.get(name));
-        FXMLLoader loader = new FXMLLoader(fxmlLocation);
-        Scene scene = new Scene(loader.load());
-        stage.setScene(scene);
+        setLoader(stage, new FXMLLoader(fxmlLocation));
     }
 
     public void setLoader(Stage stage, FXMLLoader loader) throws IOException {
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);
+        AttualScene = scene;
     }
 
     public FXMLLoader getStageFXMLLoader(String name) throws IOException  {
         return new FXMLLoader(getClass().getClassLoader().getResource(FxmlFile_Paths.get(name)));
     }
+
+
 }

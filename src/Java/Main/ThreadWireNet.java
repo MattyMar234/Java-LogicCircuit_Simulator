@@ -13,33 +13,12 @@ public class ThreadWireNet extends Thread
     private GraphicsContext g;
 
     public ThreadWireNet(ApplicationPageController controller) {
-        this.controller = controller;
-        this.g = controller.getCanvas().getGraphicsContext2D();
-        running = true;
-
-        Framedelay = (1 / FPS) * 1000000000; //delay in nS
-        LastUpdate = 0;
+       
     }
 
 
     public void run() {
 
-        while(running) {
-            double time = System.nanoTime();
-
-            if(time - LastUpdate >= Framedelay) {
-                LastUpdate = time;
-
-                for (Wire w : controller.WiresList) {
-                    w.Paint(g);
-                    w.Update();
-                }
-            }
-            else {
-                for (Wire w : controller.WiresList ) {
-                    w.Update();
-                }
-            }
-        }
+        
     }
 }
