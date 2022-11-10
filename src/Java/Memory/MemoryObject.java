@@ -1,6 +1,9 @@
 package Java.Memory;
 
-public abstract class MemoryObject {
+import Java.Main.SimulationObject;
+import Java.Main.SimulationObjectMethod;
+
+public abstract class MemoryObject extends SimulationObject {
 
     //protected InternalBus addressBus;
     //protected InternalBus dataBus;
@@ -19,8 +22,9 @@ public abstract class MemoryObject {
      */
 
      //ogni riga è composta da un 1KB
-    public MemoryObject(int KB, String fileHEX) 
+    public MemoryObject(double x, double y,int KB, String fileHEX)
     {
+        super(x,y);
         if(KB > 1024) KB = 1024;
 
         CellsMatrix = new byte [KB][rowSize];
@@ -30,6 +34,7 @@ public abstract class MemoryObject {
 
         //HexReader reader = new HexReader("C:\\Users\\Utente\\Desktop\\C - C# - C++\\C#\\68k_CPU_emulator\\Operating_System_V7.hex", this);
     }
+
 
 
     public byte read(double position) {

@@ -1,14 +1,14 @@
 package Java.Component;
 
 import Java.Main.SimulationObject;
+import Java.Main.SimulationObjectMethod;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Wire implements SimulationObject{
+public class Wire implements SimulationObjectMethod {
 
 
     public Wire() {
-
     }
 
     @Override

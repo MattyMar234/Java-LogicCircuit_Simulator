@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import Java.Component.Wire;
+import Java.Memory.AT28c512;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -15,9 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -29,7 +28,7 @@ import javafx.util.Duration;
 
 public class ApplicationPageController implements Initializable 
 {
-    private static final double MaxFPS = 120;
+    private static final double MaxFPS = 20;
 
 
     @FXML private Canvas canvas;
@@ -56,6 +55,13 @@ public class ApplicationPageController implements Initializable
     private double StartGridDraggeX = 0;
     private double StartGridDraggeY = 0;
 
+    private boolean MOVE_UP = false;
+    private boolean MOVE_DOWN = false;
+    private boolean MOVE_LEFT = false;
+    private boolean MOVE_RIGHT = false;
+    private boolean ZOOM   = false;
+    private boolean DEZOOM = false;
+
     private ArrayList <SimulationObject> SimulationComponent = new ArrayList<>();
     private Scene scene;
 
@@ -70,7 +76,7 @@ public class ApplicationPageController implements Initializable
     {
        this.main = main;
        this.main.ControllerReference = this;
-       this.SimulationComponent.add(new Wire());
+       this.SimulationComponent.add(new AT28c512(0,0, ""));
        this.scene = main.AttualScene;
     }
 
@@ -112,8 +118,6 @@ public class ApplicationPageController implements Initializable
     {
         frameCount++;
         Render();
-        
-
     }
 
     private void Render() 
@@ -155,7 +159,7 @@ public class ApplicationPageController implements Initializable
         }
 
         g.setFill(Color.RED);
-        g.fillOval(Width/2 + gridOffsetX, Height/2 + gridOffsetY, 20 * gridScale, 20 * gridScale);
+        g.fillOval(500 + gridOffsetX, 500 + gridOffsetY, 20 * gridScale, 20 * gridScale);
 
     }
 
@@ -169,38 +173,28 @@ public class ApplicationPageController implements Initializable
 
         double CenterDx = (gridWidth/2)  - Px;
         double CenterDy = (gridHeight/2) - Py;
+        double DeltaY = event.getDeltaY();
 
         System.out.println(CenterDx);
+        System.out.println("scale: " + (25 * gridScale));
+        System.out.println("gridSize: " + gridWidth + ", " + gridHeight);
+    }
 
-
-        if(event.getDeltaY() < 0) {
-            if(gridScale > 0.50) {
-
-                gridScale = gridScale / 2;
-                gridOffsetX = gridOffsetX / 2;
-                gridOffsetY = gridOffsetY / 2;
-
-                
-            }
+    private void Zoom_DeZoomOperations(double DeltaY)
+    {
+        if(DeltaY < 0 && gridScale > 0.50){
+            gridScale = gridScale / 2;
+            gridOffsetX = gridOffsetX / 2;
+            gridOffsetY = gridOffsetY / 2;
         }
-        else {
-            if(gridScale <= 100) {
-
-
-                gridScale = gridScale * 2;
-                gridOffsetX = gridOffsetX * 2;
-                gridOffsetY = gridOffsetY * 2;
-            }
+        else if(DeltaY > 0 && gridScale < 100) {
+            gridScale = gridScale * 2;
+            gridOffsetX = gridOffsetX * 2;
+            gridOffsetY = gridOffsetY * 2;
         }
 
         gridWidth = canvas.getWidth()   / gridScale;
         gridHeight = canvas.getHeight() / gridScale;
-
-        
-
-
-        System.out.println("scale: " + (25 * gridScale));
-        System.out.println("gridSize: " + gridWidth + ", " + gridHeight);
     }
 
 
@@ -241,6 +235,100 @@ public class ApplicationPageController implements Initializable
         if(gridDragged) {
             gridOffsetX = (event.getX() - StartGridDraggeX);
             gridOffsetY = (event.getY() - StartGridDraggeY);
+
+            for (SimulationObject obj : SimulationComponent) {
+                obj.Traslate(gridOffsetX, gridOffsetY);
+            }
+        }
+    }
+
+
+
+    @FXML
+    void AddEEProm(ActionEvent event) {
+
+    }
+
+
+    @FXML
+    void OnKeyPressed(KeyEvent event)
+    {
+        if(event.getCode() == KeyCode.A) {
+            MOVE_LEFT  = true;
+        }
+        else if(event.getCode() == KeyCode.D) {
+            MOVE_RIGHT = true;
+        }
+        else if(event.getCode() == KeyCode.W) {
+            MOVE_UP    = true;
+        }
+        else if(event.getCode() == KeyCode.S) {
+            MOVE_DOWN  = true;
+        }
+        else if(event.getCode() == KeyCode.Q) {
+            DEZOOM  = true;
+        }
+        else if(event.getCode() == KeyCode.E) {
+            ZOOM  = true;
+        }
+    }
+
+    @FXML
+    void OnKeyReleased(KeyEvent event)
+    {
+        if(event.getCode() == KeyCode.A) {
+            MOVE_LEFT  = false;
+        }
+        else if(event.getCode() == KeyCode.D) {
+            MOVE_RIGHT = false;
+        }
+        else if(event.getCode() == KeyCode.W) {
+            MOVE_UP    = false;
+        }
+        else if(event.getCode() == KeyCode.S) {
+            MOVE_DOWN  = false;
+        }
+        else if(event.getCode() == KeyCode.Q) {
+            DEZOOM  = false;
+        }
+        else if(event.getCode() == KeyCode.E) {
+            ZOOM  = false;
+        }
+    }
+
+    @FXML
+    void onKeyActive(KeyEvent event) {
+
+
+        if(MOVE_LEFT) {
+            gridOffsetX += 5;
+            for (SimulationObject obj : SimulationComponent) {
+                obj.Traslate(5, 0);
+            }
+        }
+        if(MOVE_RIGHT) {
+            gridOffsetX -= 5;
+            for (SimulationObject obj : SimulationComponent) {
+                obj.Traslate(-5, 0);
+            }
+        }
+        if(MOVE_UP) {
+            gridOffsetY += 5;
+            for (SimulationObject obj : SimulationComponent) {
+                obj.Traslate(0, 5);
+            }
+        }
+        if(MOVE_DOWN) {
+            gridOffsetY -= 5;
+            for (SimulationObject obj : SimulationComponent) {
+                obj.Traslate(0, -5);
+            }
+        }
+        if(DEZOOM) {
+            Zoom_DeZoomOperations(40);
+        }
+        if(ZOOM) {
+            Zoom_DeZoomOperations(-40);
         }
     }
 }
