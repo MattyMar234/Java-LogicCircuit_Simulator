@@ -51,6 +51,10 @@ public class ApplicationPageController implements Initializable
     private double gridOffsetLastY = 0.0;
     private double gridWidth = 0;
     private double gridHeight = 0;
+    double BigSquareScaled;
+    double SmallSquareScaled;
+    double lineOffsetX;
+    double lineOffsetY;
 
     private boolean gridDragged = false;
     private double StartGridDraggeX = 0;
@@ -71,11 +75,13 @@ public class ApplicationPageController implements Initializable
     protected ArrayList<Wire> WiresList = new ArrayList<Wire>();
     protected ArrayList<SimulationObject> deviceList = new ArrayList<>();*/
 
+    /*=========== PARAMETRI GLOBALI ============*/
     public static class SimulationParametre {
         public static double scaleValue = 1.0;
         public static double baseSquareSize = 20;
-        public static double CameraViewX;
-        public static double CameraViewY;
+        public static double BigSquare = 100;
+        public static int fontBaseSize = 20;
+        public static Canvas canvas;
     }
 
 
@@ -89,11 +95,6 @@ public class ApplicationPageController implements Initializable
        this.scene = main.AttualScene;
     }
 
-    public ApplicationPageController() {
-
-    }
-
-
     @Override
     public void initialize(URL location, ResourceBundle resources) 
     {
@@ -102,7 +103,6 @@ public class ApplicationPageController implements Initializable
 
         FrameDelay = (1 / ApplicationPageController.MaxFPS) * 1000;
 
-        
 
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(FrameDelay), this::onTimerTick));
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -115,7 +115,9 @@ public class ApplicationPageController implements Initializable
         gridWidth = canvas.getWidth();
         gridHeight = canvas.getHeight();
 
+        SimulationParametre.canvas = this.canvas;
 
+        ZoomOperations(0);
     }
 
     private void FramesTick(ActionEvent event) {
@@ -134,8 +136,6 @@ public class ApplicationPageController implements Initializable
         GraphicsContext g = canvas.getGraphicsContext2D();
         double Width = canvas.getWidth();
         double Height = canvas.getHeight();
-        double lineOffsetX =  ((gridOffsetX/SimulationParametre.scaleValue) % (20));
-        double lineOffsetY =  ((gridOffsetY/SimulationParametre.scaleValue) % (20));
 
         
         g.clearRect(0, 0, Width, Height);
@@ -148,19 +148,23 @@ public class ApplicationPageController implements Initializable
         g.strokeLine(0, 0, 0, Height);
         g.strokeLine(0, Height, Width, Height);
         g.strokeLine(Width, 0, Width, Height);
-        
 
 
-        for(double y = 0; y <= Height; y += (20 * SimulationParametre.scaleValue)) {
-            if((y + lineOffsetY ) % 100 == 0)g.setLineWidth(1);
-            else g.setLineWidth(0.5);
+        for(double y = -BigSquareScaled; y <= Height + BigSquareScaled; y += SmallSquareScaled)   {
+            if(((y) % 100) == 0)
+                g.setLineWidth(1);
+            else
+                g.setLineWidth(0.5);
 
-            g.strokeLine(0, y + lineOffsetY, Width - lineOffsetX, y + lineOffsetY);
+            g.strokeLine(0, y + lineOffsetY, Width, y + lineOffsetY);
         }
 
-        for(double x = 0; x <= Width; x += (20 * SimulationParametre.scaleValue)) {
-            if((x + lineOffsetX )% 100 == 0)g.setLineWidth(1);
-            else g.setLineWidth(0.5);
+        for(double x = -BigSquareScaled; x <= Width + BigSquareScaled; x += SmallSquareScaled) {
+            if(x % 100 == 0)
+                g.setLineWidth(1);
+            else
+                g.setLineWidth(0.5);
+
             g.strokeLine(x + lineOffsetX, 0, x + lineOffsetX, Height);
         }
 
@@ -185,18 +189,13 @@ public class ApplicationPageController implements Initializable
         double CenterDy = (gridHeight/2) - Py;
         double DeltaY = event.getDeltaY();
 
-        Zoom_DeZoomOperations(DeltaY);
-
-        //System.out.println(CenterDx);
-        //System.out.println("scale: " + (25 * SimulationParametre.scaleValue));
-        //System.out.println("gridSize: " + gridWidth + ", " + gridHeight);
+        ZoomOperations(DeltaY);
     }
 
-    private void Zoom_DeZoomOperations(double DeltaY)
+    private void ZoomOperations(double DeltaY)
     {
         if(DeltaY < 0 && SimulationParametre.scaleValue > 1){
             SimulationParametre.scaleValue = SimulationParametre.scaleValue / 2;
-            System.out.println("scale: " + SimulationParametre.scaleValue);
             gridOffsetX = gridOffsetX / 2;
             gridOffsetY = gridOffsetY / 2;
 
@@ -210,7 +209,6 @@ public class ApplicationPageController implements Initializable
         }
         else if(DeltaY > 0 && SimulationParametre.scaleValue < 4) {
             SimulationParametre.scaleValue = SimulationParametre.scaleValue * 2;
-            System.out.println("scale: " + SimulationParametre.scaleValue);
             gridOffsetX = gridOffsetX * 2;
             gridOffsetY = gridOffsetY * 2;
 
@@ -221,17 +219,19 @@ public class ApplicationPageController implements Initializable
             }
         }
 
-        SimulationParametre.CameraViewX = gridOffsetX*SimulationParametre.scaleValue;
-        SimulationParametre.CameraViewY = gridOffsetY*SimulationParametre.scaleValue;
+        System.out.println("scale: " + SimulationParametre.scaleValue);
 
-        System.out.println("offsetX=" + gridOffsetX + ", offsetY=" + gridOffsetY);
+        BigSquareScaled = SimulationParametre.BigSquare*SimulationParametre.scaleValue;
+        SmallSquareScaled = SimulationParametre.baseSquareSize*SimulationParametre.scaleValue;
+        lineOffsetX =  ((gridOffsetX/SimulationParametre.scaleValue) % (BigSquareScaled));
+        lineOffsetY =  ((gridOffsetY/SimulationParametre.scaleValue) % (BigSquareScaled));
 
-        
-
-        
 
         gridWidth  = canvas.getWidth()  / SimulationParametre.scaleValue;
         gridHeight = canvas.getHeight() / SimulationParametre.scaleValue;
+
+
+        //System.out.println("offsetX=" + gridOffsetX + ", offsetY=" + gridOffsetY);
     }
 
 
@@ -268,7 +268,6 @@ public class ApplicationPageController implements Initializable
 
     @FXML
     void OnDragged(MouseEvent event) {
-        
         if(gridDragged) {
 
             gridOffsetLastX = gridOffsetX;
@@ -279,8 +278,6 @@ public class ApplicationPageController implements Initializable
 
             double DX = gridOffsetX - gridOffsetLastX;
             double DY = gridOffsetY - gridOffsetLastY;
-
-
 
             for (SimulationObject obj : SimulationComponent) {
                 obj.Traslate(DX, DY);
@@ -371,10 +368,10 @@ public class ApplicationPageController implements Initializable
             }
         }
         if(DEZOOM) {
-            Zoom_DeZoomOperations(40);
+            ZoomOperations(40);
         }
         if(ZOOM) {
-            Zoom_DeZoomOperations(-40);
+            ZoomOperations(-40);
         }
     }
 }
