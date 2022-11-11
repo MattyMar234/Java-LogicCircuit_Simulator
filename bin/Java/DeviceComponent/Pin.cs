@@ -66,8 +66,6 @@ namespace DeviceComponenet
                 if(!Mode) {
                     state = false;
                 }
-
-
                 return true;
             }
             return false;

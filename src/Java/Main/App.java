@@ -25,6 +25,7 @@ public class App extends Application
     public static HashMap<String, String> FxmlFile_Paths = new HashMap<String, String>();
     protected ApplicationPageController ControllerReference;
     protected Scene AttualScene;
+    protected Stage stage;
 
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +36,7 @@ public class App extends Application
     @Override
     public void start(Stage stage) throws Exception 
     {
+        this.stage = stage;
         try { 
 
             //************ Caricamento File FXML ************//

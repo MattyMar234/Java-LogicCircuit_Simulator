@@ -26,4 +26,10 @@ public class Wire implements SimulationObjectMethod {
         g.strokeLine(40, 10, 10, 40);
         
     }
+
+    @Override
+    public void Rescale() {
+        // TODO Auto-generated method stub
+        
+    }
 }

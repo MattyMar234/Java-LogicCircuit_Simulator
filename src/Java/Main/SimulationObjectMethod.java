@@ -6,5 +6,6 @@ public interface SimulationObjectMethod {
 
     public void Update();
     public void Draw(GraphicsContext g);
+    public void Rescale();
 
 }
