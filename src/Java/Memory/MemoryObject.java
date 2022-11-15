@@ -1,9 +1,10 @@
 package Java.Memory;
 
+import Java.Component.IntegratedCircuit;
 import Java.Main.SimulationObject;
 import Java.Main.SimulationObjectMethod;
 
-public abstract class MemoryObject extends SimulationObject {
+public abstract class MemoryObject extends IntegratedCircuit {
 
     //protected InternalBus addressBus;
     //protected InternalBus dataBus;
@@ -22,9 +23,9 @@ public abstract class MemoryObject extends SimulationObject {
      */
 
      //ogni riga è composta da un 1KB
-    public MemoryObject(double x, double y,int KB, String fileHEX)
+    public MemoryObject(double x, double y, int pinNumber, String IcSigle,int KB, String fileHEX)
     {
-        super(x,y);
+        super(x,y, pinNumber, IcSigle);
         if(KB > 1024) KB = 1024;
 
         CellsMatrix = new byte [KB][rowSize];

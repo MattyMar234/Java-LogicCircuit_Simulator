@@ -1,8 +1,9 @@
 package Java.Component;
 
 import Java.Main.ApplicationPageController;
+import Java.Main.Camera;
 import Java.Main.SimulationObject;
-import Java.Main.ApplicationPageController.SimulationParametre;
+import Java.Main.ApplicationPageController.SimulationGlobalParametre;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
@@ -10,7 +11,11 @@ import javafx.scene.shape.Rectangle;
 
 import java.awt.event.MouseEvent;
 
-public class Pin extends SimulationObject {
+public class Pin extends SimulationObject 
+{
+    private Point P1;
+    private Point P2;
+    private Point Center;
 
     private int PinType;
     private double pinSize;
@@ -18,21 +23,16 @@ public class Pin extends SimulationObject {
 
     private boolean hovered = false;
 
+
     public Pin(double x, double y, int PinType) {
         super(x,y);
 
         this.PinType = PinType;
-        this.pinSize = (SimulationParametre.baseSquareSize/2)*SimulationParametre.scaleValue;
-        Box = new Rectangle(x, y, pinSize, pinSize);
+        this.pinSize = (SimulationGlobalParametre.SmallGridSquare/2);
 
-        Box.setOnMouseMoved(e -> {
-
-            @Override
-            public void handle(MouseEvent t) {
-
-            }
-        });
-
+        P1 = new Point(x,y);
+        P2 = new Point(x + pinSize, y + pinSize);  
+        Center = new Point(x + pinSize/2, y + pinSize/2);
     }
 
     @Override
@@ -40,27 +40,45 @@ public class Pin extends SimulationObject {
 
     }
     @Override
-    public void Draw(GraphicsContext g) {
-        if(hovered) {
-            g.setFill(Color.RED);
-        }
-        else {
+    public void Draw(GraphicsContext g, Camera c) {
+
+        //System.out.println("Vx: " +  V1.x + "  Vy: " +  V1.y + "  PX: " + SimulationParametre.MouseX + "  PY: " + SimulationParametre.MouseY);
+        if(isHovered())
+            g.setFill(Color.WHITE);
+        else
             g.setFill(Color.GRAY);
-        }
 
-        g.fillRect(PosX, PosY, pinSize, pinSize);
+        Point A = c.WorldToScreen(P1);
+        Point B = c.WorldToScreen(P2);
+
+        g.fillRect(A.X, A.Y, B.X - A.X, B.Y - A.Y);
+    }
+
+    public Point getCenetr() {
+        return new Point(Center);
+    }
+
+    
+
+
+    @Override
+    public void setX(double x) {
+        super.setX(x);
+
+        P1.X = x;
+        P2.X = x + pinSize;
     }
 
     @Override
-    public void Rescale() {
-        pinSize = (SimulationParametre.baseSquareSize/2)*SimulationParametre.scaleValue;
+    public void setY(double y) {
+        super.setY(y);
 
+        P1.Y = y;
+        P2.Y = y + pinSize;
+        
     }
 
-    @Override
-    public void Traslate(double tx, double ty) {
-        super.Traslate(tx,ty);
-        Box.setX(Box.getX() + tx);
-        Box.setY(Box.getY() + ty);
+    public boolean isHovered() {
+        return SimulationGlobalParametre.MouseX >= P1.X && SimulationGlobalParametre.MouseY >= P1.Y && SimulationGlobalParametre.MouseX <= P2.X && SimulationGlobalParametre.MouseY <= P2.Y;
     }
 }

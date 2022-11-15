@@ -5,7 +5,6 @@ import javafx.scene.canvas.GraphicsContext;
 public interface SimulationObjectMethod {
 
     public void Update();
-    public void Draw(GraphicsContext g);
-    public void Rescale();
+    public void Draw(GraphicsContext g, Camera C);
 
 }

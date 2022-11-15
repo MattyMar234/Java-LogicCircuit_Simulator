@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import Java.Component.IntegratedCircuit;
+import Java.Component.Point;
 import Java.Component.Wire;
 import Java.Memory.AT28c512;
 import javafx.animation.KeyFrame;
@@ -20,22 +22,39 @@ import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.robot.Robot;
-import javafx.scene.shape.Circle;
-import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 
 
-public class ApplicationPageController implements Initializable 
+public class ApplicationPageController extends Camera implements Initializable 
 {
-    private static final double MaxFPS = 20;
+    private static final double MaxFPS = 60;
+
+    public enum UserMode {
+
+        WIRING,
+        PLACING_COMPONENT,
+        SELECTION
+
+    }
+
+    public enum UserOperation {
+
+        NONE,
+        START_WRIRING,
+        DEPLOY_COMPONENT
+
+    }
+
+    public static UserMode userMode = UserMode.WIRING;
+    public static UserOperation userOperation = UserOperation.NONE;
 
 
     @FXML private Canvas canvas;
     @FXML private AnchorPane windowBack;
     @FXML private AnchorPane sideBar;
     @FXML private StackPane canvasPane;
-
+   
+    @FXML private Button WiringBt;
     @FXML private Button EEPROM_bt;
 
 
@@ -45,29 +64,11 @@ public class ApplicationPageController implements Initializable
     private int frameCount = 0;
     private App main;
 
-    private double gridOffsetX = 0.0;
-    private double gridOffsetY = 0.0;
-    private double gridOffsetLastX = 0.0;
-    private double gridOffsetLastY = 0.0;
+   
     private double gridWidth = 0;
     private double gridHeight = 0;
-    double BigSquareScaled;
-    double SmallSquareScaled;
-    double lineOffsetX;
-    double lineOffsetY;
+ 
 
-    private boolean gridDragged = false;
-    private double StartGridDraggeX = 0;
-    private double StartGridDraggeY = 0;
-
-    private boolean MOVE_UP = false;
-    private boolean MOVE_DOWN = false;
-    private boolean MOVE_LEFT = false;
-    private boolean MOVE_RIGHT = false;
-    private boolean ZOOM   = false;
-    private boolean DEZOOM = false;
-
-    private ArrayList <SimulationObject> SimulationComponent = new ArrayList<>();
     private Scene scene;
 
 
@@ -76,12 +77,17 @@ public class ApplicationPageController implements Initializable
     protected ArrayList<SimulationObject> deviceList = new ArrayList<>();*/
 
     /*=========== PARAMETRI GLOBALI ============*/
-    public static class SimulationParametre {
-        public static double scaleValue = 1.0;
-        public static double baseSquareSize = 20;
+    public static class SimulationGlobalParametre 
+    {
+        
+        public static double SmallGridSquare = 20;
         public static double BigSquare = 100;
         public static int fontBaseSize = 20;
         public static Canvas canvas;
+
+        public static double MouseX;
+        public static double MouseY;
+        
     }
 
 
@@ -89,9 +95,12 @@ public class ApplicationPageController implements Initializable
 
     public ApplicationPageController(App main) 
     {
+       super();
+       
        this.main = main;
        this.main.ControllerReference = this;
-       this.SimulationComponent.add(new AT28c512(0,0, ""));
+       this.RenderedObjectList.add(new AT28c512(0,0, ""));
+       this.RenderedObjectList.add(new AT28c512(200,200, ""));
        this.scene = main.AttualScene;
     }
 
@@ -115,9 +124,10 @@ public class ApplicationPageController implements Initializable
         gridWidth = canvas.getWidth();
         gridHeight = canvas.getHeight();
 
-        SimulationParametre.canvas = this.canvas;
+        SimulationGlobalParametre.canvas = this.canvas;
+        super.setCanvas(canvas);
 
-        ZoomOperations(0);
+        
     }
 
     private void FramesTick(ActionEvent event) {
@@ -125,8 +135,7 @@ public class ApplicationPageController implements Initializable
         frameCount = 0;
     }
 
-    private void onTimerTick(ActionEvent event) 
-    {
+    private void onTimerTick(ActionEvent event)  {
         frameCount++;
         Render();
     }
@@ -134,244 +143,114 @@ public class ApplicationPageController implements Initializable
     private void Render() 
     {
         GraphicsContext g = canvas.getGraphicsContext2D();
+        super.update();
+
+        g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        DrawGrid(g);
+
+
+
+
+        for (SimulationObject obj : RenderedObjectList) {
+            obj.Draw(g, this);
+        }
+
+        for (Wire obj : wires) {
+            obj.Draw(g, this);
+        }
+
+        if(ApplicationPageController.userOperation == UserOperation.START_WRIRING) {
+            Point A = WorldToScreen(selectedPin.getCenetr());
+
+            g.setStroke(Color.GREEN);
+            g.setLineWidth(3);
+
+            //g.strokeLine(A.X, A.Y, fMouseX + (fMouseX%20 >= 10 ? 20 : 0 - fMouseX%20), fMouseY + (fMouseY%20 >= 10 ? 20 : 0 - fMouseY%20));
+            g.strokeLine(A.X, A.Y, fMouseX, fMouseY);
+            //TAN
+        }
+
+        if(ApplicationPageController.userOperation == UserOperation.DEPLOY_COMPONENT) {
+            if(movingObject instanceof IntegratedCircuit) {
+                ((IntegratedCircuit) movingObject).MoveTo(ScreenToWorld_X(fMouseX), ScreenToWorld_Y(fMouseY));
+            }
+        }
+        DrawBorder(g);
+    }
+
+
+    @FXML
+    void AddEEProm(ActionEvent event) {
+        ApplicationPageController.userMode = UserMode.PLACING_COMPONENT;
+        ApplicationPageController.userOperation = UserOperation.DEPLOY_COMPONENT;
+
+        AT28c512 at = new AT28c512(fMouseX, fMouseY, "");
+        RenderedObjectList.add(at);
+        movingObject = at;
+    }
+
+
+    @FXML
+    void setWiringMode(MouseEvent event) {
+        ApplicationPageController.userMode = UserMode.WIRING;
+    }
+
+
+    private void DrawBorder(GraphicsContext g) 
+    {
         double Width = canvas.getWidth();
         double Height = canvas.getHeight();
-
-        
-        g.clearRect(0, 0, Width, Height);
-        
-        g.setFill(Color.GRAY);
-        g.setStroke(Color.GRAY);
 
         g.setLineWidth(4);
         g.strokeLine(0, 0, Width, 0);
         g.strokeLine(0, 0, 0, Height);
         g.strokeLine(0, Height, Width, Height);
         g.strokeLine(Width, 0, Width, Height);
-
-
-        for(double y = -BigSquareScaled; y <= Height + BigSquareScaled; y += SmallSquareScaled)   {
-            if(((y) % 100) == 0)
-                g.setLineWidth(1);
-            else
-                g.setLineWidth(0.5);
-
-            g.strokeLine(0, y + lineOffsetY, Width, y + lineOffsetY);
-        }
-
-        for(double x = -BigSquareScaled; x <= Width + BigSquareScaled; x += SmallSquareScaled) {
-            if(x % 100 == 0)
-                g.setLineWidth(1);
-            else
-                g.setLineWidth(0.5);
-
-            g.strokeLine(x + lineOffsetX, 0, x + lineOffsetX, Height);
-        }
-
-        for (SimulationObject obj : SimulationComponent) {
-            obj.Draw(g);
-        }
-
-        g.setFill(Color.RED);
-        g.fillOval(500 + gridOffsetX, 500 + gridOffsetY, 20 * SimulationParametre.scaleValue, 20 * SimulationParametre.scaleValue);
-
     }
 
-    @FXML
-    void GridZoom(ScrollEvent event) 
+
+    private void DrawGrid(GraphicsContext g) 
     {
-        double Px = event.getDeltaX();
-        double Py = event.getDeltaY();
-        double gridWidth = canvas.getWidth();
-        double gridHeight = canvas.getHeight();
+        double startGridX = WorldInScreen_sX;
+        double startGridY = WorldInScreen_sY;
+        double EndGridX = WorldInScreen_eX;
+        double EndGridY = WorldInScreen_eY;
+        
+        
+        double [] starts = new double[4]; 
+        starts[0] = startGridX - ((startGridX % 100)); //startLineX_BIGSQ
+        starts[1] = startGridX - ((startGridX % 20));  //startLineX_SMALLSQ
+        starts[2] = startGridY - ((startGridY % 100)); // startLineY_BIGSQ
+        starts[3] = startGridY - ((startGridY % 20));  // startLineY_SMALLSQ
 
-        double CenterDx = (gridWidth/2)  - Px;
-        double CenterDy = (gridHeight/2) - Py;
-        double DeltaY = event.getDeltaY();
+        g.setStroke(Color.GRAY);
+        g.setLineWidth(1.2);
 
-        ZoomOperations(DeltaY);
+        for(double y = starts[2]; y <= EndGridY; y += 100)
+            g.strokeLine(WorldToScreen_X(startGridX), WorldToScreen_Y(y), WorldToScreen_X(EndGridX), WorldToScreen_Y(y));
+        for(double x = starts[0]; x <= EndGridX; x += 100)
+            g.strokeLine(WorldToScreen_X(x), WorldToScreen_Y(startGridY), WorldToScreen_X(x), WorldToScreen_Y(EndGridY));
+        
+        g.setLineWidth(0.5);
+
+        for(double y = starts[3]; y <= EndGridY; y += 20) 
+            g.strokeLine(WorldToScreen_X(startGridX), WorldToScreen_Y(y), WorldToScreen_X(EndGridX), WorldToScreen_Y(y));
+        for(double x = starts[1]; x <= EndGridX; x += 20) 
+            g.strokeLine(WorldToScreen_X(x), WorldToScreen_Y(startGridY), WorldToScreen_X(x), WorldToScreen_Y(EndGridY));
     }
 
-    private void ZoomOperations(double DeltaY)
-    {
-        if(DeltaY < 0 && SimulationParametre.scaleValue > 1){
-            SimulationParametre.scaleValue = SimulationParametre.scaleValue / 2;
-            gridOffsetX = gridOffsetX / 2;
-            gridOffsetY = gridOffsetY / 2;
 
-            for (SimulationObject comp : SimulationComponent) {
-                comp.setX(comp.getX()/2);
-                comp.setY(comp.getY()/2);
-                comp.Rescale();
+    /*for(int k = 0; k < 4; k++ ) {
+
+            double step = k % 2 == 0 ? 100 : 20;
+            double val = (k >= 2 ? startGridY : startGridX) - ((k >= 2 ? startGridY : startGridX) % step);
+            double end = k % 2 == 0 ? startGridY : startGridX;
+
+            for(double i = val; i <= end; i += step) {
+                if(k < 2) 
+                g.strokeLine(WorldToScreen_X(i), WorldToScreen_Y(startGridY), WorldToScreen_X(i), WorldToScreen_Y(EndGridY));
+                else
+                    g.strokeLine(WorldToScreen_X(startGridX), WorldToScreen_Y(i), WorldToScreen_X(EndGridX), WorldToScreen_Y(i));
             }
-
-            
-        }
-        else if(DeltaY > 0 && SimulationParametre.scaleValue < 4) {
-            SimulationParametre.scaleValue = SimulationParametre.scaleValue * 2;
-            gridOffsetX = gridOffsetX * 2;
-            gridOffsetY = gridOffsetY * 2;
-
-            for (SimulationObject comp : SimulationComponent) {
-                comp.setX(comp.getX()*2);
-                comp.setY(comp.getY()*2);
-                comp.Rescale();
-            }
-        }
-
-        System.out.println("scale: " + SimulationParametre.scaleValue);
-
-        BigSquareScaled = SimulationParametre.BigSquare*SimulationParametre.scaleValue;
-        SmallSquareScaled = SimulationParametre.baseSquareSize*SimulationParametre.scaleValue;
-        lineOffsetX =  ((gridOffsetX/SimulationParametre.scaleValue) % (BigSquareScaled));
-        lineOffsetY =  ((gridOffsetY/SimulationParametre.scaleValue) % (BigSquareScaled));
-
-
-        gridWidth  = canvas.getWidth()  / SimulationParametre.scaleValue;
-        gridHeight = canvas.getHeight() / SimulationParametre.scaleValue;
-
-
-        //System.out.println("offsetX=" + gridOffsetX + ", offsetY=" + gridOffsetY);
-    }
-
-
-    @FXML
-    void OnMousePressed(MouseEvent event) 
-    {  
-        if(event.getButton() == MouseButton.PRIMARY) {
-
-        }
-        else if(event.getButton() == MouseButton.SECONDARY) {
-
-        }
-        else if(event.getButton() == MouseButton.MIDDLE) {
-            gridDragged = true;
-            StartGridDraggeX = event.getX() - gridOffsetX;
-            StartGridDraggeY = event.getY() - gridOffsetY;
-        }   
-    }
-
-    @FXML
-    void OnMouseReleased(MouseEvent event) 
-    {
-        if(event.getButton() == MouseButton.PRIMARY) {
-
-        }
-        else if(event.getButton() == MouseButton.SECONDARY) {
-
-        }
-        else if(event.getButton() == MouseButton.MIDDLE) {
-            gridDragged = false;
-        }   
-    }
-
-
-    @FXML
-    void OnDragged(MouseEvent event) {
-        if(gridDragged) {
-
-            gridOffsetLastX = gridOffsetX;
-            gridOffsetLastY = gridOffsetY;
-
-            gridOffsetX = (event.getX() - StartGridDraggeX);
-            gridOffsetY = (event.getY() - StartGridDraggeY);
-
-            double DX = gridOffsetX - gridOffsetLastX;
-            double DY = gridOffsetY - gridOffsetLastY;
-
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(DX, DY);
-            }
-        }
-    }
-
-
-
-    @FXML
-    void AddEEProm(ActionEvent event) {
-
-    }
-
-
-    @FXML
-    void OnKeyPressed(KeyEvent event)
-    {
-        if(event.getCode() == KeyCode.A) {
-            MOVE_LEFT  = true;
-        }
-        else if(event.getCode() == KeyCode.D) {
-            MOVE_RIGHT = true;
-        }
-        else if(event.getCode() == KeyCode.W) {
-            MOVE_UP    = true;
-        }
-        else if(event.getCode() == KeyCode.S) {
-            MOVE_DOWN  = true;
-        }
-        else if(event.getCode() == KeyCode.Q) {
-            DEZOOM  = true;
-        }
-        else if(event.getCode() == KeyCode.E) {
-            ZOOM  = true;
-        }
-    }
-
-    @FXML
-    void OnKeyReleased(KeyEvent event)
-    {
-        if(event.getCode() == KeyCode.A) {
-            MOVE_LEFT  = false;
-        }
-        else if(event.getCode() == KeyCode.D) {
-            MOVE_RIGHT = false;
-        }
-        else if(event.getCode() == KeyCode.W) {
-            MOVE_UP    = false;
-        }
-        else if(event.getCode() == KeyCode.S) {
-            MOVE_DOWN  = false;
-        }
-        else if(event.getCode() == KeyCode.Q) {
-            DEZOOM  = false;
-        }
-        else if(event.getCode() == KeyCode.E) {
-            ZOOM  = false;
-        }
-    }
-
-    @FXML
-    void onKeyActive(KeyEvent event) {
-
-
-        if(MOVE_LEFT) {
-            gridOffsetX += 5;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(5, 0);
-            }
-        }
-        if(MOVE_RIGHT) {
-            gridOffsetX -= 5;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(-5, 0);
-            }
-        }
-        if(MOVE_UP) {
-            gridOffsetY += 5;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(0, 5);
-            }
-        }
-        if(MOVE_DOWN) {
-            gridOffsetY -= 5;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(0, -5);
-            }
-        }
-        if(DEZOOM) {
-            ZoomOperations(40);
-        }
-        if(ZOOM) {
-            ZoomOperations(-40);
-        }
-    }
+        }*/
 }
