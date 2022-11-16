@@ -27,7 +27,7 @@ import javafx.util.Duration;
 
 public class ApplicationPageController extends Camera implements Initializable 
 {
-    private static final double MaxFPS = 60;
+    private static final double MaxFPS = 20;
 
     public enum UserMode {
 
@@ -167,6 +167,8 @@ public class ApplicationPageController extends Camera implements Initializable
 
             //g.strokeLine(A.X, A.Y, fMouseX + (fMouseX%20 >= 10 ? 20 : 0 - fMouseX%20), fMouseY + (fMouseY%20 >= 10 ? 20 : 0 - fMouseY%20));
             g.strokeLine(A.X, A.Y, fMouseX, fMouseY);
+            System.out.println("Angle: " + CalcRotationAngleInDegrees(A, new Point(fMouseX, fMouseY)));
+
             //TAN
         }
 
@@ -176,6 +178,17 @@ public class ApplicationPageController extends Camera implements Initializable
             }
         }
         DrawBorder(g);
+    }
+
+    private double CalcRotationAngleInDegrees(Point pinTarget, Point target) {
+        double theta = Math.atan2(target.Y - pinTarget.Y, target.X - pinTarget.X);
+        theta += Math.PI/ 2.0f;
+
+        double angle = Math.toDegrees(theta);
+
+        if(angle < 0) angle += 360;
+
+        return angle;
     }
 
 

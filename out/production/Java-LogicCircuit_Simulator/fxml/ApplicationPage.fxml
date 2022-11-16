@@ -12,7 +12,7 @@
    <children>
       <StackPane fx:id="canvasPane" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
          <children>
-            <Canvas fx:id="canvas" height="381.0" onMouseDragged="#OnDragged" onMousePressed="#OnMousePressed" onMouseReleased="#OnMouseReleased" onScroll="#GridZoom" width="487.0" />
+            <Canvas fx:id="canvas" height="381.0" onMouseDragged="#OnDragged" onMouseMoved="#OnMouseMoving" onMousePressed="#OnMousePressed" onMouseReleased="#OnMouseReleased" onScroll="#GridZoom" width="487.0" />
          </children>
       </StackPane>
       <AnchorPane fx:id="sideBar" layoutX="-24.0" layoutY="90.0" maxWidth="-Infinity" prefHeight="400.0" prefWidth="82.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -23,7 +23,10 @@
                      <children>
                         <Button fx:id="EEPROM_bt" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="30.0" minWidth="30.0" mnemonicParsing="false" onAction="#AddEEProm" prefHeight="30.0" prefWidth="69.0" text="EEPROM" />
                      </children></HBox>
-                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
+                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0">
+                     <children>
+                        <Button fx:id="WiringBt" mnemonicParsing="false" onMouseClicked="#setWiringMode" prefHeight="30.0" prefWidth="70.0" text="Wiring" />
+                     </children></HBox>
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="100.0" />

@@ -204,12 +204,15 @@ public class Camera
         ScaleOperation(event.getDeltaY(), event);
     }
 
+    private void ScaleOperation(double DeltaY, ScrollEvent event) {
+        ScaleFunc(DeltaY, event.getX(), event.getY());
+    }
 
-    private void ScaleOperation(double DeltaY, ScrollEvent event)
+    private void ScaleFunc(double DeltaY, double mx, double my)
     {
         boolean rescaleFigures = false;
-        double MouseWorldX_BeforeZoom = ScreenToWorld_X(event.getX());
-        double MouseWorldY_BeforeZoom = ScreenToWorld_Y(event.getY());
+        double MouseWorldX_BeforeZoom = ScreenToWorld_X(mx);
+        double MouseWorldY_BeforeZoom = ScreenToWorld_Y(my);
 
         
         if(DeltaY < 0 && scale > 0.25){
@@ -223,8 +226,8 @@ public class Camera
 
         if(rescaleFigures) 
         {
-            double MouseWorldX_AfterZoom = ScreenToWorld_X(event.getX());
-            double MouseWorldY_AfterZoom = ScreenToWorld_Y(event.getY());
+            double MouseWorldX_AfterZoom = ScreenToWorld_X(mx);
+            double MouseWorldY_AfterZoom = ScreenToWorld_Y(my);
 
             mapOffsetX += (MouseWorldX_BeforeZoom - MouseWorldX_AfterZoom);
             mapOffsetY += (MouseWorldY_BeforeZoom - MouseWorldY_AfterZoom);
@@ -295,39 +298,27 @@ public class Camera
     @FXML
     void onKeyActive(KeyEvent event) {
 
-        /*
+
         if(MOVE_LEFT) {
-            mapOffsetX += 5*SimulationParametre.scaleValue;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(5, 0);
-            }
+            mapOffsetX -= 10;
         }
         if(MOVE_RIGHT) {
-            mapOffsetX -= 5*SimulationParametre.scaleValue;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(-5, 0);
-            }
+            mapOffsetX += 10;
         }
         if(MOVE_UP) {
-            mapOffsetY += 5*SimulationParametre.scaleValue;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(0, 5);
-            }
+            mapOffsetY -= 10;
         }
         if(MOVE_DOWN) {
-            mapOffsetY -= 5*SimulationParametre.scaleValue;
-            for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(0, -5);
-            }
-        }*/
+            mapOffsetY += 10;
+        }
 
-        /*
+
         if(DEZOOM) {
-            ScaleOperation(40);
+            ScaleFunc(+1, fMouseX ,fMouseY);
         }
         if(ZOOM) {
-            ScaleOperation(-40);
-        }*/
+            ScaleFunc(-1, fMouseX ,fMouseY);
+        }
     }
 
 

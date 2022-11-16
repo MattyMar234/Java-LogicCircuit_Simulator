@@ -67,6 +67,7 @@ public class Pin extends SimulationObject
 
         P1.X = x;
         P2.X = x + pinSize;
+        Center.X = x + pinSize/2;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class Pin extends SimulationObject
 
         P1.Y = y;
         P2.Y = y + pinSize;
-        
+        Center.Y = y + pinSize/2;
     }
 
     public boolean isHovered() {
