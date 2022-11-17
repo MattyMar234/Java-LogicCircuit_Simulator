@@ -6,6 +6,8 @@ import Java.Component.IntegratedCircuit;
 import Java.Component.Pin;
 import Java.Component.Point;
 import Java.Component.Wire;
+import Java.Component.WireNode;
+import Java.Component.WiresNetWork;
 import Java.Main.ApplicationPageController.SimulationGlobalParametre;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -24,7 +26,7 @@ public class Camera
 
     public LinkedList<SimulationObject> SimulationObjectList = new LinkedList<SimulationObject>();
     public LinkedList<IntegratedCircuit> RenderedObjectList = new LinkedList<IntegratedCircuit>();
-    public LinkedList <Wire> wires = new LinkedList<>();
+    public LinkedList <WiresNetWork> wiresNetwork = new LinkedList<>();
 
     private Canvas canvas;
 
@@ -86,6 +88,27 @@ public class Camera
 
     }
 
+    public double gridAllingOffset(Point p, char axis) 
+    {
+        double distance = 0;
+
+        if(axis == 'x') {
+            distance = ScreenToWorld_X(p.X) % SimulationGlobalParametre.SmallGridSquare;
+        }
+        else if(axis == 'y') {
+            distance = ScreenToWorld_Y(p.Y) % SimulationGlobalParametre.SmallGridSquare;
+        }
+        else {
+            return 0.0f;
+        }
+            
+        
+        if(distance < SimulationGlobalParametre.SmallGridSquare / 2)
+            return -distance;
+        else
+            return SimulationGlobalParametre.SmallGridSquare - distance;
+    }
+
 
 
     @FXML
@@ -135,15 +158,29 @@ public class Camera
                         for(int i = 0; i < chip.PinCount(); i++) {
                             Pin p = chip.getPin(i);
     
-                            if(p.isHovered() && p != selectedPin) {                                
-                                Wire NewWire = new Wire(selectedPin, p);
-                                wires.add(NewWire);
+                            if(p.isHovered() && p != selectedPin) {  
+                                
+                                WiresNetWork w = new WiresNetWork();
+
+                                w.addNode(p);
+                                w.addNode(selectedPin);
+
+                                wiresNetwork.add(w);
 
                                 ApplicationPageController.userOperation = ApplicationPageController.UserOperation.NONE;
                                 return;
                             }
                         }
                     }
+
+                    WiresNetWork w = new WiresNetWork();
+                    Point p = new Point(fMouseX, fMouseY);
+                    ScreenToWorld(p);
+
+                    w.addNode(new WireNode(ScreenToWorld_X(p.X + gridAllingOffset(p, 'x')), ScreenToWorld_Y(p.Y + gridAllingOffset(p, 'y'))));
+                    w.addNode(selectedPin);
+                    wiresNetwork.add(w);
+                    ApplicationPageController.userOperation = ApplicationPageController.UserOperation.NONE;
                 }
             }
         }
@@ -162,15 +199,13 @@ public class Camera
         {
             LastPanX = mapOffsetX;
             LastPanY = mapOffsetY;
-
             mapOffsetX -= (event.getX() - startPanX);
             mapOffsetY -= (event.getY() - startPanY);
 
-            startPanX = event.getX();
-            startPanY = event.getY();  
+            fMouseX = startPanX = event.getX();
+            fMouseY = startPanY = event.getY();  
 
-            
-
+        
             double DeltaX = (mapOffsetX - LastPanX);
             double DeltaY = (mapOffsetY - LastPanY);
 
@@ -181,10 +216,6 @@ public class Camera
 
             //System.out.println("DX: " + DX + " DY: " + DY + " lineOffsetX: " + lineOffsetX + " lineOffsetY: " + lineOffsetY);
         
-
-            /*for (SimulationObject obj : SimulationComponent) {
-                obj.Traslate(DX, DY);
-            }*/
         }
     }
 

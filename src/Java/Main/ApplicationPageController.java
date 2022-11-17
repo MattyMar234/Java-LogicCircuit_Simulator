@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 import Java.Component.IntegratedCircuit;
 import Java.Component.Point;
 import Java.Component.Wire;
+import Java.Component.WiresNetWork;
 import Java.Memory.AT28c512;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -155,21 +156,12 @@ public class ApplicationPageController extends Camera implements Initializable
             obj.Draw(g, this);
         }
 
-        for (Wire obj : wires) {
+        for (WiresNetWork obj : wiresNetwork) {
             obj.Draw(g, this);
         }
 
         if(ApplicationPageController.userOperation == UserOperation.START_WRIRING) {
-            Point A = WorldToScreen(selectedPin.getCenetr());
-
-            g.setStroke(Color.GREEN);
-            g.setLineWidth(3);
-
-            //g.strokeLine(A.X, A.Y, fMouseX + (fMouseX%20 >= 10 ? 20 : 0 - fMouseX%20), fMouseY + (fMouseY%20 >= 10 ? 20 : 0 - fMouseY%20));
-            g.strokeLine(A.X, A.Y, fMouseX, fMouseY);
-            System.out.println("Angle: " + CalcRotationAngleInDegrees(A, new Point(fMouseX, fMouseY)));
-
-            //TAN
+            DrawLine(g);      
         }
 
         if(ApplicationPageController.userOperation == UserOperation.DEPLOY_COMPONENT) {
@@ -188,7 +180,7 @@ public class ApplicationPageController extends Camera implements Initializable
 
         if(angle < 0) angle += 360;
 
-        return angle;
+        return (360 - angle + 90) % 360;
     }
 
 
@@ -220,6 +212,28 @@ public class ApplicationPageController extends Camera implements Initializable
         g.strokeLine(0, Height, Width, Height);
         g.strokeLine(Width, 0, Width, Height);
     }
+
+    private void DrawLine(GraphicsContext g ) {
+        Point A = WorldToScreen(selectedPin.getCenetr());
+
+            g.setStroke(Color.GREEN);
+            g.setLineWidth(3);
+
+            Point B = new Point(fMouseX, fMouseY);
+
+            double ang = CalcRotationAngleInDegrees(A, B);
+            //System.out.println(ang);
+            
+            //seleziono la x
+            if(!(ang > 45 && ang < 135) && !(ang > 270 - 45 && ang < 360 - 45)) {
+                g.strokeLine(A.X, A.Y, B.X + gridAllingOffset(B, 'x'), A.Y);
+            }
+            else {
+                g.strokeLine(A.X, A.Y, A.X, B.Y + gridAllingOffset(B, 'y'));
+            }
+    }
+
+    
 
 
     private void DrawGrid(GraphicsContext g) 

@@ -11,7 +11,7 @@ import javafx.scene.shape.Rectangle;
 
 import java.awt.event.MouseEvent;
 
-public class Pin extends SimulationObject 
+public class Pin extends WireNode 
 {
     private Point P1;
     private Point P2;
