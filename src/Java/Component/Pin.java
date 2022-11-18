@@ -13,10 +13,6 @@ import java.awt.event.MouseEvent;
 
 public class Pin extends WireNode 
 {
-    private Point P1;
-    private Point P2;
-    private Point Center;
-
     private int PinType;
     private double pinSize;
     private Rectangle Box;
@@ -30,9 +26,9 @@ public class Pin extends WireNode
         this.PinType = PinType;
         this.pinSize = (SimulationGlobalParametre.SmallGridSquare/2);
 
-        P1 = new Point(x,y);
-        P2 = new Point(x + pinSize, y + pinSize);  
-        Center = new Point(x + pinSize/2, y + pinSize/2);
+        drawingPoints[FistPointIndex]   = new Point(x,y);
+        drawingPoints[SecondPointIndex] = new Point(x + pinSize, y + pinSize);;
+        drawingPoints[CenetrPointIndex] = new Point(x + pinSize/2, y + pinSize/2);;
     }
 
     @Override
@@ -48,15 +44,13 @@ public class Pin extends WireNode
         else
             g.setFill(Color.GRAY);
 
-        Point A = c.WorldToScreen(P1);
-        Point B = c.WorldToScreen(P2);
+        Point A = c.WorldToScreen(drawingPoints[FistPointIndex]);
+        Point B = c.WorldToScreen(drawingPoints[SecondPointIndex]);
 
         g.fillRect(A.X, A.Y, B.X - A.X, B.Y - A.Y);
     }
 
-    public Point getCenetr() {
-        return new Point(Center);
-    }
+
 
     
 
@@ -65,21 +59,18 @@ public class Pin extends WireNode
     public void setX(double x) {
         super.setX(x);
 
-        P1.X = x;
-        P2.X = x + pinSize;
-        Center.X = x + pinSize/2;
+        drawingPoints[FistPointIndex].X = x;
+        drawingPoints[SecondPointIndex].X = x + pinSize;
+        drawingPoints[CenetrPointIndex].X = x + pinSize/2;
     }
 
     @Override
     public void setY(double y) {
         super.setY(y);
 
-        P1.Y = y;
-        P2.Y = y + pinSize;
-        Center.Y = y + pinSize/2;
+        drawingPoints[FistPointIndex].Y = y;
+        drawingPoints[SecondPointIndex].Y = y + pinSize;
+        drawingPoints[CenetrPointIndex].Y = y + pinSize/2;
     }
 
-    public boolean isHovered() {
-        return SimulationGlobalParametre.MouseX >= P1.X && SimulationGlobalParametre.MouseY >= P1.Y && SimulationGlobalParametre.MouseX <= P2.X && SimulationGlobalParametre.MouseY <= P2.Y;
-    }
 }

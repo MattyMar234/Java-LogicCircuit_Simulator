@@ -14,5 +14,13 @@ public class Point {
         this.X = toClone.X;
         this.Y = toClone.Y;
     }
-    
+
+    @Override
+    public String toString() {
+        String str = "";
+
+        str += "Position [x: " + X + " ,Y: " + Y + "]";
+
+        return str;
+    }
 }

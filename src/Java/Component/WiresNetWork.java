@@ -3,19 +3,20 @@ package Java.Component;
 import java.util.LinkedList;
 
 import Java.Main.Camera;
+import Java.Main.SimulationObject;
 import Java.Main.SimulationObjectMethod;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-public class WiresNetWork implements SimulationObjectMethod{
+public class WiresNetWork implements SimulationObjectMethod {
 
     //INPUTS
 
     //OUTPUT
 
     protected Paint currentNetWPaint = Color.rgb(200,0,0);
-    protected LinkedList<WireNode> netWorkNodes = new LinkedList<WireNode>();
+    public LinkedList<WireNode> netWorkNodes = new LinkedList<WireNode>();
 
     public WiresNetWork() {
 
@@ -63,14 +64,15 @@ public class WiresNetWork implements SimulationObjectMethod{
 
     private Point getNodeCenter(WireNode n, Camera c) {
         if(n instanceof Pin) 
-        return c.WorldToScreen((((Pin)n).getCenetr()));
-        else 
-            
-            return c.WorldToScreen(n.center);
+            return c.WorldToScreen((((Pin)n).getCenetr()));
+        else
+            return c.WorldToScreen(n.drawingPoints[SimulationObject.CenetrPointIndex]);
     }
 
     public void addNode(WireNode node) {
         netWorkNodes.add(node);
+
+        System.out.println("nodo [" + netWorkNodes.size() + "] pos: " + node.drawingPoints[SimulationObject.CenetrPointIndex].toString());
 
         node.ownNetWork = this;
     }

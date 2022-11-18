@@ -58,7 +58,7 @@ public class Camera
     protected boolean ZOOM   = false;
     protected boolean DEZOOM = false;
 
-    protected Pin selectedPin;
+    protected WireNode selectedPin;
     protected SimulationObject movingObject;
     
     
@@ -88,7 +88,8 @@ public class Camera
 
     }
 
-    public double gridAllingOffset(Point p, char axis) 
+    /*Allinea la coordinata ai vertici della agriglia*/
+    public double gridAllingOffset(Point p, char axis)
     {
         double distance = 0;
 
@@ -141,12 +142,24 @@ public class Camera
             if(ApplicationPageController.userMode == ApplicationPageController.UserMode.WIRING) 
             {
                 if(ApplicationPageController.userOperation == ApplicationPageController.UserOperation.NONE) {
+
                     for (IntegratedCircuit chip : RenderedObjectList) {
                         for(int i = 0; i < chip.PinCount(); i++) {
                             Pin p = chip.getPin(i);
-    
+
                             if(p.isHovered()) {
                                 selectedPin = p;
+                                ApplicationPageController.userOperation = ApplicationPageController.UserOperation.START_WRIRING;
+                                return;
+                            }
+                        }
+                    }
+
+                    for (WiresNetWork net : wiresNetwork) {
+                        for(WireNode node : net.netWorkNodes) {
+
+                            if(node.isHovered()) {
+                                selectedPin = node;
                                 ApplicationPageController.userOperation = ApplicationPageController.UserOperation.START_WRIRING;
                                 return;
                             }
